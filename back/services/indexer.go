@@ -1,12 +1,13 @@
 package main
 
 import (
-	"fmt"
-	"encoding/json"
 	"bufio"
-	"os"
-	"path/filepath"
+	"fmt"
 	"strings"
+	"os"
+	"encoding/json"
+	"os/exec"
+	"path/filepath"
 )
 
 type Datamail struct {
@@ -33,6 +34,7 @@ var fileKeys = map[string]string{
 }
 var mails []Datamail
 var indexJson string = `{ "index" : { "_index" : "mails" } }`
+var USER_PASSWORD_DB = "userName:password"
 
 // this function will be executed for each file
 // Save file info in a Datamail struct and append it to mails list
@@ -74,8 +76,11 @@ func getMailFromFile(path string, info os.DirEntry, err error) error {
 			}
 		}
 		// creamos un struct con la info guardada en el map y lo agregamos a la lista
-		mail := Datamail{MessageID: data[fileKeys["messageID"]], Date: data[fileKeys["date"]], SenderEmail: data[fileKeys["senderEmail"]], RecipientEmail: data[fileKeys["recipientEmail"]], Subject: data[fileKeys["subject"]], UserName: data[fileKeys["userName"]], CategoryFolder: data[fileKeys["categoryFolder"]], Body: data[fileKeys["body"]]}
-		if !(mail.MessageID == "" && mail.Date == "" && mail.SenderEmail == "" && mail.RecipientEmail == "" && mail.Subject == "" && mail.UserName == "" && mail.CategoryFolder == "" && mail.Body == "") {
+		mail := Datamail{MessageID: data[fileKeys["messageID"]], Date: data[fileKeys["date"]], SenderEmail: data[fileKeys["senderEmail"]],
+			RecipientEmail: data[fileKeys["recipientEmail"]], Subject: data[fileKeys["subject"]], UserName: data[fileKeys["userName"]],
+			CategoryFolder: data[fileKeys["categoryFolder"]], Body: data[fileKeys["body"]]}
+		if !(mail.MessageID == "" && mail.Date == "" && mail.SenderEmail == "" && mail.RecipientEmail ==
+			"" && mail.Subject == "" && mail.UserName == "" && mail.CategoryFolder == "" && mail.Body == "") {
 			mails = append(mails, mail)
 		}
 	}
@@ -118,7 +123,12 @@ func main() {
 		createNdjson(mails)
 		// con el archivo ndjson generado, se puede hacer la carga masiva en zincsearch usando el comando curl
 		// curl http://localhost:4080/api/_bulk -i -u userName:password  --data-binary "@mails.ndjson"
-
+		cmd := exec.Command("curl", "http://localhost:4080/api/_bulk", "-i", "-u", USER_PASSWORD_DB, "--data-binary", "@mails.ndjson")
+		err = cmd.Run()
+		if err != nil {
+			fmt.Println("Error al ejecutar el comando curl:", err)
+		}
+	
 	} else {
 		fmt.Println("Se debe proporcionar un parámetro: el nombre de la carpeta")
 	}
