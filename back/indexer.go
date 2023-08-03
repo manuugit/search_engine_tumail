@@ -1,12 +1,15 @@
 package main
 
 import (
-	"fmt"
-	"encoding/json"
 	"bufio"
+	"encoding/json"
+	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
+
+	env "git.com/searchEngineTumail"
 )
 
 type Datamail struct {
@@ -33,12 +36,13 @@ var fileKeys = map[string]string{
 }
 var mails []Datamail
 var indexJson string = `{ "index" : { "_index" : "mails" } }`
+var USER_PASSWORD_DB = env.USERDB + ":" + env.PASSWORDDB
 
 // this function will be executed for each file
 // Save file info in a Datamail struct and append it to mails list
 func getMailFromFile(path string, info os.DirEntry, err error) error {
 	if err != nil {
-		fmt.Printf("Error al acceder a %q: %v\n", path, err)
+		log.Fatal("Error al acceder a:", path, err)
 		return err
 	}
 
@@ -48,7 +52,7 @@ func getMailFromFile(path string, info os.DirEntry, err error) error {
 		// lectura del archivo
 		content, err := os.ReadFile(path)
 		if err != nil {
-			fmt.Println("Error leyendo archivo:", err)
+			log.Fatal("Error leyendo archivo", err)
 			return err
 		}
 		// se pasa cada línea del archivo a una lista
@@ -74,8 +78,12 @@ func getMailFromFile(path string, info os.DirEntry, err error) error {
 			}
 		}
 		// creamos un struct con la info guardada en el map y lo agregamos a la lista
-		mail := Datamail{MessageID: data[fileKeys["messageID"]], Date: data[fileKeys["date"]], SenderEmail: data[fileKeys["senderEmail"]], RecipientEmail: data[fileKeys["recipientEmail"]], Subject: data[fileKeys["subject"]], UserName: data[fileKeys["userName"]], CategoryFolder: data[fileKeys["categoryFolder"]], Body: data[fileKeys["body"]]}
-		if !(mail.MessageID == "" && mail.Date == "" && mail.SenderEmail == "" && mail.RecipientEmail == "" && mail.Subject == "" && mail.UserName == "" && mail.CategoryFolder == "" && mail.Body == "") {
+		mail := Datamail{MessageID: data[fileKeys["messageID"]], Date: data[fileKeys["date"]], SenderEmail: data[fileKeys["senderEmail"]],
+			RecipientEmail: data[fileKeys["recipientEmail"]], Subject: data[fileKeys["subject"]], UserName: data[fileKeys["userName"]],
+			CategoryFolder: data[fileKeys["categoryFolder"]], Body: data[fileKeys["body"]]}
+		// se valida que no sea un archivo vacío
+		if !(mail.MessageID == "" && mail.Date == "" && mail.SenderEmail == "" && mail.RecipientEmail ==
+			"" && mail.Subject == "" && mail.UserName == "" && mail.CategoryFolder == "" && mail.Body == "") {
 			mails = append(mails, mail)
 		}
 	}
@@ -86,7 +94,7 @@ func getMailFromFile(path string, info os.DirEntry, err error) error {
 func createNdjson(list []Datamail) {
 	file, err := os.Create("mails.ndjson")
 	if err != nil {
-		fmt.Println("Error al crear el archivo:", err)
+		log.Fatal("Error creando archivo", err)
 	}
 	defer file.Close()
 
@@ -97,7 +105,7 @@ func createNdjson(list []Datamail) {
 		// se escribe el registro
 		err = json.NewEncoder(writer).Encode(element)
 		if err != nil {
-			fmt.Println("Error al escribir en ndjson:", err)
+			log.Fatal("Error al escribir en ndjson ", err)
 		}
 		writer.Flush()
 	}
@@ -107,20 +115,25 @@ func main() {
 	// se pasa el nombre de la carpeta por línea de comandos
 	if len(os.Args) == 2 {
 		dirName := os.Args[1]
-		path := "../../../../" + dirName
+		path := "../../../" + dirName
+		log.Println("procesando...")
 
-		fmt.Println("procesando...")
 		err := filepath.WalkDir(path, getMailFromFile)
 		if err != nil {
-			fmt.Printf("Error recorriendo subdirectorios: %v\n", err)
+			log.Fatal("Error recorriendo subdirectorios:", err)
 		}
 
 		createNdjson(mails)
 		// con el archivo ndjson generado, se puede hacer la carga masiva en zincsearch usando el comando curl
 		// curl http://localhost:4080/api/_bulk -i -u userName:password  --data-binary "@mails.ndjson"
+		cmd := exec.Command("curl", "http://localhost:4080/api/_bulk", "-i", "-u", USER_PASSWORD_DB, "--data-binary", "@mails.ndjson")
+		err = cmd.Run()
+		if err != nil {
+			log.Fatal("Error al ejecutar el comando curl:", err)
+		}
 
 	} else {
-		fmt.Println("Se debe proporcionar un parámetro: el nombre de la carpeta")
+		log.Fatal("Se debe proporcionar un parámetro: el nombre de la carpeta")
 	}
 
 }
