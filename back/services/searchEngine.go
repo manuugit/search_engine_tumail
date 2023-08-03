@@ -33,7 +33,7 @@ func SearchMatch(term string, fromDate string, toDate string, maxResults int, fi
 		return nil, err
 	}
 
-	// se construye el request a la API search
+	// se construye el request a la API search de zincsearch
 	reqType, url, bodyJsonStr := "POST", "http://localhost:4080/api/mails/_search", string(queryStr)
 	req, err := http.NewRequest(reqType, url, strings.NewReader(bodyJsonStr))
 	if err != nil {
