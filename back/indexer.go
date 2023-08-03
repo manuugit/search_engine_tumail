@@ -42,7 +42,7 @@ var USER_PASSWORD_DB = env.USERDB + ":" + env.PASSWORDDB
 // Save file info in a Datamail struct and append it to mails list
 func getMailFromFile(path string, info os.DirEntry, err error) error {
 	if err != nil {
-		log.Fatal("Error al acceder a %q: %v\n", path, err)
+		log.Fatal("Error al acceder a:", path, err)
 		return err
 	}
 
@@ -81,6 +81,7 @@ func getMailFromFile(path string, info os.DirEntry, err error) error {
 		mail := Datamail{MessageID: data[fileKeys["messageID"]], Date: data[fileKeys["date"]], SenderEmail: data[fileKeys["senderEmail"]],
 			RecipientEmail: data[fileKeys["recipientEmail"]], Subject: data[fileKeys["subject"]], UserName: data[fileKeys["userName"]],
 			CategoryFolder: data[fileKeys["categoryFolder"]], Body: data[fileKeys["body"]]}
+		// se valida que no sea un archivo vacío
 		if !(mail.MessageID == "" && mail.Date == "" && mail.SenderEmail == "" && mail.RecipientEmail ==
 			"" && mail.Subject == "" && mail.UserName == "" && mail.CategoryFolder == "" && mail.Body == "") {
 			mails = append(mails, mail)
