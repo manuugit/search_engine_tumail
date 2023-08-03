@@ -2,21 +2,33 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"git.com/searchEngineTumail/back/services"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 )
 
 var router = chi.NewRouter()
+var corsOptions = cors.New(cors.Options{
+	AllowedOrigins:   []string{"http://localhost:5173"},
+	AllowedMethods:   []string{"GET"},
+	AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
+	ExposedHeaders:   []string{"Link"},
+	AllowCredentials: true,
+	MaxAge:           300, // Duración máxima de la caché de pre-vuelo (preflight cache)
+})
 
 type ErrorResponse struct {
 	Message string
 }
 
 func main() {
+	log.Println("searchEngine running in http://localhost:8080")
+	router.Use(corsOptions.Handler)
 	router.Get("/search/match", searchMatch)
 	http.ListenAndServe(":8080", router)
 }

@@ -1,10 +1,8 @@
 <script setup>
-import MailsList from './components/MailsList.vue'
-import SearchTab from './components/SearchTab.vue'
+  import SearchPage from './components/SearchPage.vue'
 </script>
 
 <template>
-  <SearchTab/>
-  <MailsList/>
+  <SearchPage/>
 </template>
 
