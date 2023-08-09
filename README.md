@@ -5,11 +5,11 @@ Project to search text from an emails database, like a search engine would do.
 ![image](https://github.com/manuugit/search_engine_tumail/assets/77813632/46316f1c-dde1-4c54-a074-69f7a68a4f76)
 
 ## Technologies:
-* [Zincsearch 0.4.7] (https://zincsearch-docs.zinc.dev)
+* [Zincsearch 0.4.7](https://zincsearch-docs.zinc.dev)
 * Go 1.20.6 
-* [API Router chi] (https://go-chi.io/#/pages/routing)
-* [Vue 3] (https://vuejs.org)
-* [Tailwindcss] (https://tailwindcss.com/docs/installation)
+* [API Router chi](https://go-chi.io/#/pages/routing)
+* [Vue 3](https://vuejs.org)
+* [Tailwindcss](https://tailwindcss.com/docs/installation)
 * Node js v18.17.0 
 * npm v9.8.1
 
