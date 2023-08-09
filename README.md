@@ -27,7 +27,7 @@ Go configurations to use and import modules
     `go mod init serverDomain/packageName` For example: 'git.com/project' <br>
 Now, we can import external packages in go
 Note: for each package/folder in the project it can exist only one main package
-* `go.sum` file is generated and updated automatically 
+* `go.sum` file is generated and updated automatically using go mod tidy
 
 ### Notes - front
 How to create a vue project using npm
