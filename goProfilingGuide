@@ -1,0 +1,29 @@
+PASOS PARA EL PERFILAMIENTO
+
+/* Instalación pprof
+    go get -u github.com/google/pprof
+/* Hacemos la configuracion dentro del codigo para habilitar el profiling,
+Nota: si la ejecución es muy rápida poner un sleep de más de 10 segs y especificar en el comando
+cuántos segundos queremos evaluar
+
+/* Instalación para generar la gráfica
+sudo apt install graphviz
+
+/* Compilamos y ejecutamos el código
+Nota: mientras está en ejecución, hacemos el profiling
+/* comando para generar profiling y la gráfica en svg
+    go tool pprof -seconds 10 -svg http://localhost:1234/debug/pprof/profile > profile.svg
+/* comando si solo queremos el profiling, e interactuar con la línea de comandos de pprof
+    go tool pprof -seconds 10 http://localhost:1234/debug/pprof/profile
+        top10
+        top5 -cum
+
+Otra forma de hacerlo, sin http
+/* se compila el archivo
+/* se ejecuta
+/* una vez finalizada la ejecución, debe generarse el archivo .prof que escribimos en código
+/* ejecutar los comandos para ver el profiling
+    * Entra a CLI de pprof
+    go tool pprof indexer.prof
+    * Genera la gráfica de profiling en svg
+    go tool pprof -svg indexer.prof > profiling.svg
