@@ -12,13 +12,14 @@ export default {
         async getMails() {
             const term = this.searchedWord
             // timestamps del momento en que se cargó el registro en zincsearch
-            const startTime = '2023-08-02T14:28:31.894Z'
-            const endTime = '2023-08-04T15:28:31.894Z'
+            const startTime = '2023-08-07T19:47:00.894Z'
+            const endTime = '2023-08-09T15:28:31.894Z'
             const maxResults = 50
             const fields = []
             const data = await getMailsxMatch(term, startTime, endTime, maxResults, fields)
             return data.hits
-        }
+        },
+        
     },
     data() {
         return {
@@ -35,5 +36,5 @@ export default {
 
 <template>
     <SearchTab @send-word="searchMatch" />
-    <MailsList :mails="mails" />
+    <MailsList :mails="mails" :searchedWord="searchedWord"/>
 </template>

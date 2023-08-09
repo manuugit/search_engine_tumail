@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime/pprof"
 	"strings"
 
 	env "git.com/searchEngineTumail"
@@ -112,6 +113,15 @@ func createNdjson(list []Datamail) {
 }
 
 func main() {
+	// inicia profiling de CPU
+	f, err := os.Create("indexer.prof")
+	if err != nil {
+		log.Println("error generando perfil de cpu")
+	}
+	defer f.Close()
+	pprof.StartCPUProfile(f)
+	defer pprof.StopCPUProfile()
+
 	// se pasa el nombre de la carpeta por línea de comandos
 	if len(os.Args) == 2 {
 		dirName := os.Args[1]
@@ -136,4 +146,5 @@ func main() {
 		log.Fatal("Se debe proporcionar un parámetro: el nombre de la carpeta")
 	}
 
+	//time.Sleep(30 * time.Second)
 }
