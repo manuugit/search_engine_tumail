@@ -4,12 +4,24 @@ export default {
         mails: {
             type: Array,
             required: true
+        },
+        searchedWord: {
+            type: String,
+            required: true
         }
     },
     methods: {
         selectMail(mail) {
             this.selectedMail = mail; // Asigna el valor del elemento seleccionado a la variable
-            console.log(this.selectedMail.Body)
+            //console.log(this.selectedMail._source.Body)
+        }
+    },
+    computed: {
+        highlightContent() {
+        const regex = new RegExp(`\\b${this.searchedWord}\\b`, 'gi');
+        // contenido donde se van a buscar la palabra que queremos resaltar
+        const content = this.selectedMail._source.Body;
+            return content.replace(regex, '<span style="font-weight: bold;color: purple;">$&</span>');
         }
     },
     data() {
@@ -24,8 +36,9 @@ export default {
 <template>
     <div class="margins-container flex flex-row">
         <div class="col-start-1 col-span-4 mid-1-2-space">
+            <p class="bodymail-style" v-if="mails.length"> **Click on the email to read the body** <br> </p>
             <ul role="list" class="divide-y divide-gray-100">
-                <li v-for="mail in mails" :key="mail._source.SenderEmail + mail._source.Date" class="flex justify-between gap-x-6 py-5"
+                <li v-for="mail in mails" :key="mail._source.MessageID" class="flex justify-between gap-x-6 py-5"
                     @click="selectMail(mail)" style="cursor: pointer;">
                     <div class="flex gap-x-4">
                         <img class="h-12 w-12 flex-none rounded-full bg-gray-50"
@@ -46,9 +59,11 @@ export default {
                 </li>
             </ul>
         </div>
-
-        <span v-if="mails.length" class="mail-container-style">
-            <p class="bodymail-style"> Click on the email to read the body: <br> <br> {{ selectedMail && selectedMail._source.Body }}</p>
+        
+        <span v-if="selectedMail != null" class="mail-container-style">
+            <p class="bodymail-style"> <br>
+                <span v-html="highlightContent"></span>
+            </p>
         </span>
     </div>
 </template>
